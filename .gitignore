@@ -1,0 +1,4 @@
+# This is a sample .gitignore file for a C project
+secrets.h
+
+

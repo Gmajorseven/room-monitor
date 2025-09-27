@@ -2,6 +2,7 @@
 #include <PubSubClient.h>
 #include <DHT.h>
 #include "secrets.h"
+
 const char* ssid = SECRET_SSID; 
 const char* password = SECRET_PASS;
 const char* mqtt_server = SECRET_MQTT_SERVER;
@@ -9,14 +10,18 @@ const int mqtt_port = SECRET_MQTT_PORT; // 1883 for non-SSL, 8883 for SSL/TLS
 const char* mqtt_Client = SECRET_MQTT_CLIENT;
 const char* mqtt_username = SECRET_MQTT_USER; // If applicable, otherwise set to NULL
 const char* mqtt_password = SECRET_MQTT_PASS; // If applicable, otherwise set to NULL
+
 float temperature, humidity = 0;
+float lastTemperature = 0;
+long lastMsg = 0;
+
 char msg[100];
 unsigned long lastUpdateTime, currentMillis = 0;
-long lastMsg = 0;
-float lastTemperature = 0;
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 DHT dht(27, DHT22);
+
 float readTemperature() {
   float t = dht.readTemperature();
   if(isnan(t)) {    
@@ -26,6 +31,7 @@ float readTemperature() {
     return t;
   }
 }
+
 float readHumidity() {
   float h = dht.readHumidity();
   if(isnan(h)) {
@@ -35,9 +41,11 @@ float readHumidity() {
     return h;
   }
 }
+
 void reconnect() {
   while(!client.connected()) {
     Serial.print("Attempting NETPIE2020 connection…");
+
     if(client.connect(mqtt_Client, mqtt_username, mqtt_password)) {
       Serial.println("NETPIE2020 connected");
     } else {
@@ -48,16 +56,19 @@ void reconnect() {
     }
   }
 }
+
 void setup() {
   dht.begin();
   Serial.begin(115200);
   Serial.println("Starting...");
+
   if(WiFi.begin(ssid, password)) {
     while(WiFi.status() != WL_CONNECTED) {
       delay(1000);
       Serial.print(".");
     }
   }
+
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
